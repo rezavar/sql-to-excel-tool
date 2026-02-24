@@ -1,7 +1,10 @@
-# خروجی‌ها و داده‌های موقت
-output/
-db/
-dump/
+# خروجی‌ها و داده‌های موقت (ساختار پوشه با .gitkeep در ریپو می‌ماند)
+output/*
+!output/.gitkeep
+db/*
+!db/.gitkeep
+dump/*
+!dump/.gitkeep
 
 # Python
 __pycache__/
