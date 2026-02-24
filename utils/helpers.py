@@ -1,5 +1,6 @@
 import gzip
 import os
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -108,7 +109,7 @@ def get_shamsi_date() -> str:
 def create_output_folder(base_dir: Path, folder_name: str) -> Path:
     """
     داخل base_dir یک پوشه با نام folder_name می‌سازد.
-    اگر وجود داشت، عدد به انتها اضافه می‌کند (مثلاً folder_1, folder_2).
+    همیشه با شماره است: folder_1، folder_2، ... (حتی اولین بار).
     """
     base_dir = Path(base_dir)
     base_dir.mkdir(parents=True, exist_ok=True)
@@ -116,18 +117,19 @@ def create_output_folder(base_dir: Path, folder_name: str) -> Path:
     # نام تمیز برای پوشه (حذف کاراکترهای نامعتبر)
     safe_name = "".join(c for c in folder_name if c.isalnum() or c in "_-") or "output"
 
-    target = base_dir / safe_name
-    if not target.exists():
-        target.mkdir(parents=True, exist_ok=True)
-        return target
+    # پیدا کردن بزرگ‌ترین شمارهٔ موجود برای این پیشوند
+    pattern = re.compile(re.escape(safe_name) + r"_(\d+)$")
+    existing = []
+    for p in base_dir.iterdir():
+        if p.is_dir():
+            m = pattern.match(p.name)
+            if m:
+                existing.append(int(m.group(1)))
+    n = max(existing, default=0) + 1
 
-    n = 1
-    while True:
-        candidate = base_dir / f"{safe_name}_{n}"
-        if not candidate.exists():
-            candidate.mkdir(parents=True, exist_ok=True)
-            return candidate
-        n += 1
+    candidate = base_dir / f"{safe_name}_{n}"
+    candidate.mkdir(parents=True, exist_ok=True)
+    return candidate
 
 
 def _format_table_stats(
