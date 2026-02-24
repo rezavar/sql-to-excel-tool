@@ -1,0 +1,6 @@
+openpyxl
+xlsxwriter
+sqlparse
+chardet
+python-bidi
+jdatetime

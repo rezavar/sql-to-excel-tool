@@ -1,0 +1,27 @@
+# خروجی‌ها و داده‌های موقت
+output/
+db/
+dump/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# محیط و ادیتور
+.cursor/
+.vscode/
+*.session.sql
+
+# سیستمی
+.DS_Store
+Thumbs.db
+*.log
