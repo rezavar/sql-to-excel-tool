@@ -215,6 +215,10 @@ def main():
             paths = exporter.export_view_chunked(
                 RFM_DATA_TABLE,
                 output_base_name="rfm_data",
+                column_formats={
+                    "total_spent": "#,##0",
+                    "last_order_amount": "#,##0",
+                },
             )
             for p in paths:
                 print(rtl(f"فایل Excel: {p.name}"))

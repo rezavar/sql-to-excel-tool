@@ -55,11 +55,13 @@ class ExcelExporter:
         output_base_name: str,
         column_headers: list[str] | None = None,
         max_rows_per_file: int | None = None,
+        column_formats: dict[str, str] | None = None,
     ) -> list[Path]:
         """
         خروجی view به چند فایل Excel با حداکثر ردیف مشخص.
         نام فایل‌ها: 1_{base}.xlsx, 2_{base}.xlsx, ...
         از xlsxwriter برای پشتیبانی صحیح از Unicode و متن فارسی استفاده می‌شود.
+        column_formats: نام ستون -> رشته فرمت عددی xlsxwriter (مثلاً "#,##0.00" برای کاما استایل).
         """
         max_rows = max_rows_per_file or EXCEL_MAX_ROWS_PER_FILE
         total = self.db.execute(f'SELECT COUNT(*) FROM "{view_name}"').fetchone()[0]
@@ -95,6 +97,15 @@ class ExcelExporter:
             if rtl_format is None:
                 rtl_format = wb.add_format({"reading_order": 2})  # RTL
 
+            # فرمت‌های عددی اختیاری (کاما استایل و غیره) با RTL
+            format_cache: dict[str, object] = {}
+            if column_formats:
+                for fmt_str in column_formats.values():
+                    if fmt_str not in format_cache:
+                        format_cache[fmt_str] = wb.add_format(
+                            {"reading_order": 2, "num_format": fmt_str}
+                        )
+
             # هدر
             for col, val in enumerate(columns):
                 ws.write(0, col, _ensure_str(val), rtl_format)
@@ -104,11 +115,22 @@ class ExcelExporter:
                 for col_idx, val in enumerate(row):
                     if val is None:
                         cell_val = ""
+                        fmt = rtl_format
                     elif isinstance(val, (int, float)):
                         cell_val = val
+                        col_name = columns[col_idx] if col_idx < len(columns) else None
+                        if (
+                            column_formats
+                            and col_name
+                            and col_name in column_formats
+                        ):
+                            fmt = format_cache[column_formats[col_name]]
+                        else:
+                            fmt = rtl_format
                     else:
                         cell_val = _ensure_str(val)
-                    ws.write(row_idx + 1, col_idx, cell_val, rtl_format)
+                        fmt = rtl_format
+                    ws.write(row_idx + 1, col_idx, cell_val, fmt)
 
             wb.close()
             exported.append(output_path)
