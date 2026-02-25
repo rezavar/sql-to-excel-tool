@@ -173,7 +173,7 @@ def write_output_readme(
     readme_path = folder / "README.txt"
     shamsi_date = get_shamsi_date()
     lines = [
-        f"تاریخ: {shamsi_date}",
+        f"تاریخ ایجاد گزارش: {shamsi_date}",
         f"نام فایل: {dump_name}",
         f"حجم فایل: {size_mb} MB",
     ]
